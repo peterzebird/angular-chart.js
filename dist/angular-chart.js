@@ -117,9 +117,6 @@
             var chartType = type || scope.chartType;
             if (! chartType) return;
 
-            if (chart && canUpdateChart(newVal, oldVal))
-              return updateChart(chart, newVal, scope);
-
             createChart(chartType);
           }, true);
 
