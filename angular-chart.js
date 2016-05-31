@@ -10,6 +10,8 @@
     define(['angular', 'chart'], factory);
   } else {
     // Browser globals
+    if (typeof angular === 'undefined' || typeof Chart === 'undefined') throw new Error('Chart.js library needs to included, ' +
+    'see http://jtblin.github.io/angular-chart.js/');
     factory(angular, Chart);
   }
 }(function (angular, Chart) {
@@ -18,6 +20,7 @@
   Chart.defaults.global.multiTooltipTemplate = '<%if (datasetLabel){%><%=datasetLabel%>: <%}%><%= value %>';
   Chart.defaults.global.elements.line.borderWidth = 2;
   Chart.defaults.global.elements.rectangle.borderWidth = 2;
+  Chart.defaults.global.legend.display = false;
   Chart.defaults.global.colors = [
     '#97BBCD', // blue
     '#DCDCDC', // light grey
@@ -40,6 +43,7 @@
     .directive('chartBase', ['ChartJsFactory', function (ChartJsFactory) { return new ChartJsFactory(); }])
     .directive('chartLine', ['ChartJsFactory', function (ChartJsFactory) { return new ChartJsFactory('line'); }])
     .directive('chartBar', ['ChartJsFactory', function (ChartJsFactory) { return new ChartJsFactory('bar'); }])
+    .directive('chartHorizontalBar', ['ChartJsFactory', function (ChartJsFactory) { return new ChartJsFactory('horizontalBar'); }])
     .directive('chartRadar', ['ChartJsFactory', function (ChartJsFactory) { return new ChartJsFactory('radar'); }])
     .directive('chartDoughnut', ['ChartJsFactory', function (ChartJsFactory) { return new ChartJsFactory('doughnut'); }])
     .directive('chartPie', ['ChartJsFactory', function (ChartJsFactory) { return new ChartJsFactory('pie'); }])
@@ -113,6 +117,9 @@
             }
             var chartType = type || scope.chartType;
             if (! chartType) return;
+
+            if (chart && canUpdateChart(newVal, oldVal))
+              return updateChart(chart, newVal, scope);
 
             createChart(chartType);
           }, true);
@@ -275,7 +282,7 @@
             data: item
           });
           if (yaxis) {
-            dataset.yAxisID = 'y-axis-' + (i + 1);
+            dataset.yAxisID = yaxis[i];
           }
           return dataset;
         })
